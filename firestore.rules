@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email in ['your@email.com'];
+    }
+    function str(v, n) { return v is string && v.size() > 0 && v.size() <= n; }
+
+    // תוכן האתר: כולם קוראים, רק מנהל כותב
+    match /content/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // פניות: כל גולש יכול ליצור (עם הסכמה), רק מנהל קורא/מעדכן/מוחק
+    match /leads/{id} {
+      allow create: if request.resource.data.keys().hasOnly(
+          ['student','grade','parent','phone','kind','status','notes','source','createdAt','consent','marketing','consentAt'])
+        && str(request.resource.data.student, 80)
+        && request.resource.data.grade in ['ח׳','ט׳']
+        && str(request.resource.data.parent, 80)
+        && str(request.resource.data.phone, 20)
+        && request.resource.data.kind in ['התעניינות','ערב פתוח','בקשה לשיחה']
+        && request.resource.data.status == 'מתעניין חדש'
+        && request.resource.data.notes == ''
+        && request.resource.data.source is string && request.resource.data.source.size() <= 60
+        && request.resource.data.consent == true
+        && request.resource.data.marketing is bool
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // סטטיסטיקת כניסות
+    match /visits/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['t','source','ref'])
+        && request.resource.data.t == request.time
+        && request.resource.data.source is string && request.resource.data.source.size() <= 60
+        && request.resource.data.ref is string && request.resource.data.ref.size() <= 300;
+      allow read: if isAdmin();
+    }
+  }
+}
