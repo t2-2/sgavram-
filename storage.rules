@@ -4,7 +4,7 @@ service firebase.storage {
     match /site/{file} {
       allow read: if true;
       allow write: if request.auth != null
-        && request.auth.token.email in ['your@email.com']
+        && request.auth.token.email in ['swhrymgbtrm@gmail.com']
         && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }
