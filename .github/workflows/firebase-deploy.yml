@@ -1,0 +1,36 @@
+name: Deploy Firebase (functions + rules)
+on:
+  push:
+    branches: [main]
+    paths:
+      - "functions/**"
+      - "firestore.rules"
+      - "storage.rules"
+      - "firebase.json"
+      - ".github/workflows/firebase-deploy.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT: ${{ secrets.FIREBASE_PROJECT_ID }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      - run: npm i -g firebase-tools
+      - run: npm install
+        working-directory: functions
+      - name: Set mail secrets
+        run: |
+          printf '%s' "$GMAIL_USER" | firebase functions:secrets:set GMAIL_USER --data-file - --force --project "$PROJECT"
+          printf '%s' "$GMAIL_APP_PASSWORD" | firebase functions:secrets:set GMAIL_APP_PASSWORD --data-file - --force --project "$PROJECT"
+      - name: Deploy
+        run: firebase deploy --only functions,firestore:rules,storage --project "$PROJECT" --non-interactive --force
