@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="canonical" href="https://YOUR-DOMAIN.co.il/"><meta name="theme-color" content="#0d5aa7"><meta property="og:type" content="website"><meta property="og:locale" content="he_IL"><meta property="og:title" content="לימודים עם חיל האוויר | מסלול השוחרות – אורט גבעת רם"><meta property="og:description" content="כטמ״מ, אלקטרוניקה והנדסת תוכנה. נסיעות חינם, פסיכומטרי ממומן, סיורים בבסיסים. הרשמו לערב פתוח."><meta property="og:url" content="https://YOUR-DOMAIN.co.il/"><meta property="og:image" content="https://YOUR-DOMAIN.co.il/og.jpg"><meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"EducationalOrganization","name":"מסלול השוחרות של חיל האוויר – אורט גבעת רם","url":"https://hantar-plus.vercel.app/","telephone":"+972-52-9285303","address":{"@type":"PostalAddress","addressLocality":"ירושלים","addressCountry":"IL"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"EducationalOrganization","name":"מסלול השוחרות של חיל האוויר – אורט גבעת רם","url":"https://sgavram-iafj.vercel.app/","telephone":"+972-52-9285303","address":{"@type":"PostalAddress","addressLocality":"ירושלים","addressCountry":"IL"}}</script>
 <title>לימודים עם חיל האוויר | מסלול השוחרות – אורט גבעת רם</title>
 <meta name="description" content="מסלול השוחרות של חיל האוויר בקמפוס אורט גבעת רם ירושלים: כטמ״מ, אלקטרוניקה והנדסת תוכנה. נסיעות חינם, פסיכומטרי ממומן, סיורים בבסיסים. הרשמו לערב פתוח.">
 <style>
@@ -142,11 +142,12 @@ html.na *{animation:none!important;transition:none!important}html.na .rv{opacity
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import{getFirestore,doc,setDoc,onSnapshot,collection,addDoc,updateDoc,query,orderBy,limit,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import{getStorage,ref,uploadBytes,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 /* ===== הגדרות: מלאו את פרטי הפרויקט שלכם ב-Firebase ===== */
-const CFG={apiKey:"AIzaSyA64pxzSKP37muFd2xNcv09W_93eBQn27Q",authDomain:"sgav-44f9d.firebaseapp.com",projectId:"sgav-44f9d",appId:"1:683447982490:web:c29919b2898f3dc7e30223"};
-const ADMINS=["swhrymgbtrm@gmail.com"]; // חייב להתאים גם ל-Security Rules
+const CFG={apiKey:"YOUR_API_KEY",authDomain:"YOUR_PROJECT.firebaseapp.com",projectId:"YOUR_PROJECT",storageBucket:"YOUR_STORAGE_BUCKET",appId:"YOUR_APP_ID"};
+const ADMINS=["your@email.com"]; // חייב להתאים גם ל-Security Rules
 const WA="972529285303";
-const app=initializeApp(CFG),auth=getAuth(app),db=getFirestore(app);
+const app=initializeApp(CFG),auth=getAuth(app),db=getFirestore(app),st=getStorage(app);
 const ST=["מתעניין חדש","נוצר קשר","הוזמן לערב פתוח","הגיע לערב","בתהליך רישום","נרשם"];
 const $=i=>document.getElementById(i),esc=t=>{const d=document.createElement('div');d.textContent=t==null?'':t;return d.innerHTML};
 function route(){const h=location.hash,a=h==='#admin',e=h==='#edit';if(e&&authReady&&!admin){location.hash='#admin';return}$('site').classList.toggle('hid',a);$('admin').classList.toggle('hid',!a);document.querySelector('.wa').classList.toggle('hid',a||e);setEdit(e&&admin);$('done').classList.toggle('hid',!(e&&admin))}
@@ -162,9 +163,11 @@ const imgs=[...document.querySelectorAll('.ph,.photo')];imgs.forEach((e,i)=>e.da
 const cref=doc(db,'content','site');
 onSnapshot(cref,s=>{const d=s.data()||{};els.forEach(e=>{const v=d[e.dataset.k];if(v!=null&&document.activeElement!==e)e.innerHTML=v});imgs.forEach(e=>{const u=d[e.dataset.i];if(u){e.style.background='url("'+String(u).replace(/["\\]/g,'')+'") center/cover';e.innerHTML='';e.setAttribute('role','img');e.setAttribute('aria-label','תמונה מהמסלול')}})},()=>{});
 let unsub2=null,visits=[],authReady=false,admin=false,edit=false,unsub=null,leads=[],first=true;
-function setEdit(on){edit=on;document.body.classList.toggle('edit',on);els.forEach(e=>e.contentEditable=on)}
+function setEdit(on){if(on===edit)return;edit=on;document.body.classList.toggle('edit',on);els.forEach(e=>e.contentEditable=on);document.querySelectorAll('details').forEach(d=>d.open=on)}
+document.querySelectorAll('details').forEach(d=>d.addEventListener('toggle',()=>{if(edit&&!d.open)d.open=true}));
 els.forEach(e=>e.addEventListener('blur',()=>{if(edit)setDoc(cref,{[e.dataset.k]:e.innerHTML},{merge:true})}));
-imgs.forEach(e=>e.addEventListener('click',ev=>{if(!edit)return;ev.preventDefault();const u=prompt('קישור (URL) לתמונה:');if(u)setDoc(cref,{[e.dataset.i]:u},{merge:true})}));
+async function shrink(file){const b=await createImageBitmap(file),k=Math.min(1,1600/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/jpeg',.85))}
+imgs.forEach(e=>e.addEventListener('click',ev=>{if(!edit)return;ev.preventDefault();const f=document.createElement('input');f.type='file';f.accept='image/*';f.onchange=async()=>{const file=f.files[0];if(!file)return;toast('מעלה תמונה…');try{const r=ref(st,'site/'+Date.now()+'.jpg');await uploadBytes(r,await shrink(file),{contentType:'image/jpeg'});await setDoc(cref,{[e.dataset.i]:await getDownloadURL(r)},{merge:true});toast('התמונה עודכנה')}catch(x){toast('ההעלאה נכשלה')}};f.click()}));
 document.querySelectorAll('summary').forEach(s=>s.addEventListener('click',ev=>{if(edit)ev.preventDefault()}));
 $('done').onclick=()=>{location.hash=''};
 document.querySelectorAll('#f label:not(.chk)').forEach(l=>{const c=l.nextElementSibling;if(c&&c.name){c.id='f_'+c.name;l.htmlFor=c.id}});
