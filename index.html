@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="canonical" href="https://YOUR-DOMAIN.co.il/"><meta name="theme-color" content="#0d5aa7"><meta property="og:type" content="website"><meta property="og:locale" content="he_IL"><meta property="og:title" content="לימודים עם חיל האוויר | מסלול השוחרות – אורט גבעת רם"><meta property="og:description" content="כטמ״מ, אלקטרוניקה והנדסת תוכנה. נסיעות חינם, פסיכומטרי ממומן, סיורים בבסיסים. הרשמו לערב פתוח."><meta property="og:url" content="https://YOUR-DOMAIN.co.il/"><meta property="og:image" content="https://YOUR-DOMAIN.co.il/og.jpg"><meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"EducationalOrganization","name":"מסלול השוחרות של חיל האוויר – אורט גבעת רם","url":"https://sgavram-iafj.vercel.app/","telephone":"+972-52-9285303","address":{"@type":"PostalAddress","addressLocality":"ירושלים","addressCountry":"IL"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"EducationalOrganization","name":"מסלול השוחרות של חיל האוויר – אורט גבעת רם","url":"https://YOUR-DOMAIN.co.il/","telephone":"+972-52-9285303","address":{"@type":"PostalAddress","addressLocality":"ירושלים","addressCountry":"IL"}}</script>
 <title>לימודים עם חיל האוויר | מסלול השוחרות – אורט גבעת רם</title>
 <meta name="description" content="מסלול השוחרות של חיל האוויר בקמפוס אורט גבעת רם ירושלים: כטמ״מ, אלקטרוניקה והנדסת תוכנה. נסיעות חינם, פסיכומטרי ממומן, סיורים בבסיסים. הרשמו לערב פתוח.">
 <style>
@@ -145,7 +145,7 @@ import{getFirestore,doc,setDoc,onSnapshot,collection,addDoc,updateDoc,query,orde
 import{getStorage,ref,uploadBytes,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 /* ===== הגדרות: מלאו את פרטי הפרויקט שלכם ב-Firebase ===== */
 const CFG={apiKey:"YOUR_API_KEY",authDomain:"YOUR_PROJECT.firebaseapp.com",projectId:"YOUR_PROJECT",storageBucket:"YOUR_STORAGE_BUCKET",appId:"YOUR_APP_ID"};
-const ADMINS=["your@email.com"]; // חייב להתאים גם ל-Security Rules
+const ADMINS=["swhrymgbtrm@gmail.com"]; // חייב להתאים גם ל-Security Rules
 const WA="972529285303";
 const app=initializeApp(CFG),auth=getAuth(app),db=getFirestore(app),st=getStorage(app);
 const ST=["מתעניין חדש","נוצר קשר","הוזמן לערב פתוח","הגיע לערב","בתהליך רישום","נרשם"];
@@ -162,7 +162,7 @@ els.forEach((e,i)=>e.dataset.k='e'+i);
 const imgs=[...document.querySelectorAll('.ph,.photo')];imgs.forEach((e,i)=>e.dataset.i='i'+i);
 const cref=doc(db,'content','site');
 onSnapshot(cref,s=>{const d=s.data()||{};els.forEach(e=>{const v=d[e.dataset.k];if(v!=null&&document.activeElement!==e)e.innerHTML=v});imgs.forEach(e=>{const u=d[e.dataset.i];if(u){e.style.background='url("'+String(u).replace(/["\\]/g,'')+'") center/cover';e.innerHTML='';e.setAttribute('role','img');e.setAttribute('aria-label','תמונה מהמסלול')}})},()=>{});
-let unsub2=null,visits=[],authReady=false,admin=false,edit=false,unsub=null,leads=[],first=true;
+let cu=null,unsub2=null,visits=[],authReady=false,admin=false,edit=false,unsub=null,leads=[],first=true;
 function setEdit(on){if(on===edit)return;edit=on;document.body.classList.toggle('edit',on);els.forEach(e=>e.contentEditable=on);document.querySelectorAll('details').forEach(d=>d.open=on)}
 document.querySelectorAll('details').forEach(d=>d.addEventListener('toggle',()=>{if(edit&&!d.open)d.open=true}));
 els.forEach(e=>e.addEventListener('blur',()=>{if(edit)setDoc(cref,{[e.dataset.k]:e.innerHTML},{merge:true})}));
@@ -181,10 +181,10 @@ document.getElementById('f').addEventListener('submit',async e=>{e.preventDefaul
 try{await addDoc(collection(db,'leads'),o);m.textContent='תודה! קיבלנו את הפרטים ונחזור אליכם בקרוב.';e.target.reset();window.dataLayer&&dataLayer.push({event:'lead_submit'})}
 catch(x){const t='שלום, אני מתעניין/ת במסלול השוחרות.\nתלמיד/ה: '+o.student+' ('+o.grade+')\nהורה: '+o.parent+'\nטלפון: '+o.phone+'\nפנייה: '+o.kind;m.innerHTML='לא הצלחנו לשמור. <a href="https://wa.me/'+WA+'?text='+encodeURIComponent(t)+'">שליחה בוואטסאפ</a>'}});
 /* אימות ופאנל מתעניינים */
-onAuthStateChanged(auth,u=>{admin=!!u&&ADMINS.includes(u.email);authReady=true;panel();route()});
+onAuthStateChanged(auth,u=>{admin=!!u&&ADMINS.includes(u.email);cu=u;authReady=true;panel();route()});
 function toast(t){const x=$('toast');x.textContent=t;x.classList.add('on');setTimeout(()=>x.classList.remove('on'),4000);try{const c=new AudioContext(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.15)}catch(_){}try{Notification.permission==='granted'&&new Notification(t)}catch(_){}}
 function panel(){const b=$('adm');if(unsub){unsub();unsub=null}if(unsub2){unsub2();unsub2=null}
-if(!admin){b.innerHTML='<form id="lf"><input id="em" type="email" placeholder="אימייל" required><input id="pw" type="password" placeholder="סיסמה" required><button class="btn">כניסה</button><div id="le"></div></form>';$('lf').onsubmit=async e=>{e.preventDefault();try{await signInWithEmailAndPassword(auth,$('em').value,$('pw').value)}catch(x){$('le').textContent='פרטי כניסה שגויים'}};return}
+if(!admin){b.innerHTML='<form id="lf"><input id="em" type="email" placeholder="אימייל" required><input id="pw" type="password" placeholder="סיסמה" required><button class="btn">כניסה</button><div id="le"></div></form>';if(cu)$('le').textContent='מחובר כ-'+cu.email+', אך אין לו הרשאת מנהל. בדקו את ADMINS ב-index.html ואת כללי האבטחה.';$('lf').onsubmit=async e=>{e.preventDefault();try{await signInWithEmailAndPassword(auth,$('em').value,$('pw').value)}catch(x){const M={'auth/invalid-credential':'אימייל או סיסמה לא נכונים','auth/invalid-api-key':'מפתח ה-API ב-CFG לא תקין','auth/api-key-not-valid.-please-pass-a-valid-api-key.':'מפתח ה-API ב-CFG לא תקין','auth/operation-not-allowed':'כניסה באימייל וסיסמה לא מופעלת ב-Firebase','auth/network-request-failed':'בעיית רשת','auth/too-many-requests':'יותר מדי ניסיונות, נסו מאוחר יותר','auth/user-disabled':'המשתמש חסום','auth/invalid-email':'כתובת אימייל לא תקינה'};$('le').textContent=(M[x.code]||'שגיאה')+' ('+x.code+')'}};return}
 b.innerHTML='<p><a class="btn" href="#edit" style="padding:10px 18px">עריכת האתר</a> <button class="btn" id="lo" style="padding:10px 18px">יציאה</button></p><div id="stats" class="card" style="margin-bottom:12px"></div><select id="fg" style="max-width:160px"><option value="">כל הכיתות</option><option>ח׳</option><option>ט׳</option></select> <button class="btn" id="ex" style="padding:10px 18px">ייצוא CSV</button> <button class="btn" id="nt" style="padding:10px 18px">הפעל התראות</button><div class="scr"><table id="tb"></table></div>';
 $('fg').onchange=draw;$('lo').onclick=()=>signOut(auth);$('nt').onclick=()=>Notification.requestPermission();
 $('ex').onclick=()=>{const r=[['תאריך','תלמיד','כיתה','הורה','טלפון','פנייה','סטטוס','הערות']].concat(leads.map(l=>[l.createdAt&&l.createdAt.toDate?l.createdAt.toDate().toLocaleString('he-IL'):'',l.student,l.grade,l.parent,l.phone,l.kind,l.status,l.notes]));const c='\ufeff'+r.map(x=>x.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));a.download='leads.csv';a.click()};
